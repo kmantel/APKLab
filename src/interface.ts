@@ -169,7 +169,9 @@ export namespace UI {
      * Show a QuickPick with extra args and build the APK.
      * @param apktoolYmlPath path of the `apktool.yml` file.
      */
-    export async function rebuildAPK(apktoolYmlPath: string): Promise<void> {
+    export async function rebuildAPK(
+        apktoolYmlPath: string
+    ): Promise<string[] | undefined> {
         const quickPickItems = await showArgsQuickPick(
             quickPickUtil.getQuickPickItems("rebuildQuickPickItems"),
             "Additional Apktool arguments",
@@ -180,5 +182,6 @@ export namespace UI {
         if (args) {
             await apktool.rebuildAPK(apktoolYmlPath, args);
         }
+        return args;
     }
 }

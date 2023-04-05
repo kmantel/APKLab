@@ -3,6 +3,7 @@ import * as fs from "fs";
 import { commands, Uri } from "vscode";
 import * as yml from "js-yaml";
 import { UI } from "../interface";
+import { apktool } from "./apktool";
 
 export namespace SplitConfig {
     export async function analyzeAllAPK(
@@ -110,5 +111,34 @@ export namespace SplitConfig {
             Uri.file(projectRootDir),
             true
         );
+    }
+
+    export async function rebuildAllApks(configYmlPath: string): Promise<void> {
+        const data: any = yml.load(fs.readFileSync(configYmlPath, "utf8"));
+        let args: string[] | undefined = undefined;
+        const distBuildFiles: string[] = [];
+        for (const [idx, apkDir] of data["projectsDir"].entries()) {
+            const apktoolYmlPath = path.join(apkDir, "apktool.yml");
+            distBuildFiles.push(path.join(apkDir, "dist", data["apks"][idx]));
+            if (!args) {
+                args = await UI.rebuildAPK(apktoolYmlPath);
+            } else {
+                await apktool.rebuildAPK(apktoolYmlPath, args);
+            }
+        }
+        const newDistPath = path.join(path.parse(configYmlPath).dir, "dist");
+        fs.mkdir(newDistPath, (err) => {
+            if (err) console.log("overwriting dist folder....");
+            for (const [idx, apkPath] of distBuildFiles.entries()) {
+                const newPath = path.join(newDistPath, data["apks"][idx]);
+                fs.rename(apkPath, newPath, (err) => {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    console.log("File moved successfully!");
+                });
+            }
+        });
     }
 }

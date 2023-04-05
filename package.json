@@ -74,6 +74,10 @@
             {
                 "command": "apklab.quarkReport",
                 "title": "APKLab: Show Quark analysis report"
+            },
+            {
+                "command": "apklab.buildSplitApks",
+                "title": "APKLab: Rebuild all apks"
             }
         ],
         "menus": {
@@ -119,6 +123,11 @@
                     "command": "apklab.quarkReport",
                     "when": "resourceFilename == quarkReport.json",
                     "group": "navigation"
+                },
+                {
+                    "command": "apklab.buildSplitApks",
+                    "when": "resourceFilename == configs.yml",
+                    "group": "navigation"
                 }
             ],
             "editor/title": [
@@ -137,6 +146,11 @@
                 {
                     "command": "apklab.quarkReport",
                     "when": "resourceFilename == quarkReport.json"
+                },
+                {
+                    "command": "apklab.buildSplitApks",
+                    "when": "resourceFilename == configs.yml",
+                    "group": "navigation"
                 }
             ],
             "explorer/context": [
@@ -163,6 +177,11 @@
                 {
                     "command": "apklab.quarkReport",
                     "when": "resourceFilename == quarkReport.json",
+                    "group": "navigation"
+                },
+                {
+                    "command": "apklab.buildSplitApks",
+                    "when": "resourceFilename == configs.yml",
                     "group": "navigation"
                 }
             ]

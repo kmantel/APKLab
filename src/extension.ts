@@ -8,6 +8,7 @@ import { apkMitm } from "./tools/apk-mitm";
 import { Quark } from "./tools/quark-engine";
 import { adb } from "./tools/adb";
 import { apktool } from "./tools/apktool";
+import { SplitConfig } from "./tools/split-config";
 
 export function activate(context: vscode.ExtensionContext): void {
     console.log("Activated apklab extension!");
@@ -110,6 +111,22 @@ export function activate(context: vscode.ExtensionContext): void {
         },
     );
 
+    // command to build all split apks
+    const buildSplitApks = vscode.commands.registerCommand(
+        "apklab.buildSplitApks",
+        (uri: vscode.Uri) => {
+            checkAndInstallTools()
+                .then(() => {
+                    SplitConfig.rebuildAllApks(uri.fsPath);
+                })
+                .catch(() => {
+                    outputChannel.appendLine(
+                        "Can't download/update dependencies!"
+                    );
+                });
+        }
+    );
+
     context.subscriptions.push(
         openApkFileCommand,
         rebuildAPkFileCommand,
@@ -118,6 +135,7 @@ export function activate(context: vscode.ExtensionContext): void {
         patchApkForHttpsCommand,
         emptyFrameworkDirCommand,
         quarkReportCommand,
+        buildSplitApks,
     );
 
     // check if open folder contains `quarkReport.json` file
