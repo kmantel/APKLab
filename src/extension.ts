@@ -127,6 +127,13 @@ export function activate(context: vscode.ExtensionContext): void {
         }
     );
 
+    const installAllSplitApks = vscode.commands.registerCommand(
+        "apklab.installAllSplitApks",
+        (uri: vscode.Uri) => {
+            SplitConfig.installAllApks(uri.fsPath);
+        }
+    );
+
     context.subscriptions.push(
         openApkFileCommand,
         rebuildAPkFileCommand,
@@ -136,6 +143,7 @@ export function activate(context: vscode.ExtensionContext): void {
         emptyFrameworkDirCommand,
         quarkReportCommand,
         buildSplitApks,
+        installAllSplitApks,
     );
 
     // check if open folder contains `quarkReport.json` file

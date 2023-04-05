@@ -78,6 +78,10 @@
             {
                 "command": "apklab.buildSplitApks",
                 "title": "APKLab: Rebuild all apks"
+            },
+            {
+                "command": "apklab.installAllSplitApks",
+                "title": "APKLab: Install all apks"
             }
         ],
         "menus": {
@@ -128,6 +132,11 @@
                     "command": "apklab.buildSplitApks",
                     "when": "resourceFilename == configs.yml",
                     "group": "navigation"
+                },
+                {
+                    "command": "apklab.installAllSplitApks",
+                    "when": "resourceFilename == configs.yml",
+                    "group": "navigation"
                 }
             ],
             "editor/title": [
@@ -149,6 +158,11 @@
                 },
                 {
                     "command": "apklab.buildSplitApks",
+                    "when": "resourceFilename == configs.yml",
+                    "group": "navigation"
+                },
+                {
+                    "command": "apklab.installAllSplitApks",
                     "when": "resourceFilename == configs.yml",
                     "group": "navigation"
                 }
@@ -181,6 +195,11 @@
                 },
                 {
                     "command": "apklab.buildSplitApks",
+                    "when": "resourceFilename == configs.yml",
+                    "group": "navigation"
+                },
+                {
+                    "command": "apklab.installAllSplitApks",
                     "when": "resourceFilename == configs.yml",
                     "group": "navigation"
                 }

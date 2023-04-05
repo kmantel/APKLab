@@ -4,6 +4,7 @@ import { commands, Uri } from "vscode";
 import * as yml from "js-yaml";
 import { UI } from "../interface";
 import { apktool } from "./apktool";
+import { executeProcess } from "../utils/executor";
 
 export namespace SplitConfig {
     export async function analyzeAllAPK(
@@ -139,6 +140,24 @@ export namespace SplitConfig {
                     console.log("File moved successfully!");
                 });
             }
+        });
+    }
+
+    export async function installAllApks(configYmlPath: string): Promise<void> {
+        const data: any = yml.load(fs.readFileSync(configYmlPath, "utf8"));
+        const distPath = path.join(path.parse(configYmlPath).dir, "dist");
+        const apkFilesName = data["apks"].map((apk: string) =>
+            path.join(distPath, apk)
+        );
+        const cmd = apkFilesName.join(" ");
+
+        const report = `Installing ${cmd}`;
+        const args = ["install-multiple", "-r", ...apkFilesName];
+        await executeProcess({
+            name: "Installing",
+            report: report,
+            command: "adb",
+            args: args,
         });
     }
 }
