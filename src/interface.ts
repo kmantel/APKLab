@@ -7,6 +7,7 @@ import { Quark } from "./tools/quark-engine";
 import { apktool } from "./tools/apktool";
 import { git } from "./tools/git";
 import { jadx } from "./tools/jadx";
+import { SplitConfig } from "./tools/split-config";
 
 export namespace UI {
     /**
@@ -59,9 +60,12 @@ export namespace UI {
                 const jadxOptionsNumber = argDescriptions.filter(
                     (item) => item === "jadx",
                 ).length;
+                const isSplitConfigApk =
+                    argDescriptions.indexOf("split_config") > -1;
                 let decompileJava = false;
                 let quarkAnalysis = false;
                 let jadxArgs: string[] = [];
+
                 if (jadxOptionsIndex > -1) {
                     jadxArgs = args.splice(jadxOptionsIndex, jadxOptionsNumber);
                 }
@@ -95,31 +99,26 @@ export namespace UI {
                     projectDir = projectDir + "1";
                 }
 
-                // decode APK
-                await apktool.decodeAPK(apkFilePath, projectDir, args);
-
-                // decompile APK
-                if (decompileJava) {
-                    await jadx.decompileAPK(apkFilePath, projectDir, jadxArgs);
-                }
-                // quark analysis
-                if (quarkAnalysis) {
-                    await Quark.analyzeAPK(apkFilePath, projectDir);
-                }
-
-                // Initialize project dir as git repo
-                const initializeGit = workspace
-                    .getConfiguration(extensionConfigName)
-                    .get("initProjectDirAsGit");
-                if (initializeGit)
-                    await git.initGitDir(projectDir, "Initial APKLab project");
-
-                // open project dir in a new window
-                if (!process.env["TEST"]) {
-                    await commands.executeCommand(
-                        "vscode.openFolder",
-                        Uri.file(projectDir),
-                        true,
+                if (isSplitConfigApk) {
+                    const parentPath = path.parse(result[0].fsPath).dir;
+                    SplitConfig.analyzeAllAPK(
+                        parentPath,
+                        apkFilePath,
+                        projectDir,
+                        args,
+                        decompileJava,
+                        jadxArgs,
+                        quarkAnalysis
+                    );
+                } else {
+                    await processApkFile(
+                        apkFilePath,
+                        projectDir,
+                        args,
+                        decompileJava,
+                        jadxArgs,
+                        quarkAnalysis,
+                        true
                     );
                 }
             }
@@ -127,7 +126,45 @@ export namespace UI {
             outputChannel.appendLine("APKLAB: no APK file was chosen");
         }
     }
+    export async function processApkFile(
+        apkFilePath: string,
+        projectDir: string,
+        args: string[],
+        decompileJava: boolean,
+        jadxArgs: string[],
+        quarkAnalysis: boolean,
+        openNewWindow: boolean
+    ): Promise<void> {
+        // decode APK
+        await apktool.decodeAPK(apkFilePath, projectDir, args);
 
+        // decompile APK
+        if (decompileJava) {
+            await jadx.decompileAPK(apkFilePath, projectDir, jadxArgs);
+        }
+        // quark analysis
+        if (quarkAnalysis) {
+            await Quark.analyzeAPK(apkFilePath, projectDir);
+        }
+
+        // Initialize project dir as git repo
+        const initializeGit = await workspace
+            .getConfiguration(extensionConfigName)
+            .get("initProjectDirAsGit");
+        if (initializeGit)
+            await git.initGitDir(projectDir, "Initial APKLab project");
+
+        // open prodject
+
+        // open project dir in a new window
+        if (!process.env["TEST"] && openNewWindow) {
+            await commands.executeCommand(
+                "vscode.openFolder",
+                Uri.file(projectDir),
+                true,
+            );
+        }
+    }
     /**
      * Show a QuickPick with extra args and build the APK.
      * @param apktoolYmlPath path of the `apktool.yml` file.

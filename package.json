@@ -251,6 +251,7 @@
         "webpack-cli": "^5.1.4"
     },
     "dependencies": {
+        "@types/js-yaml": "^4.0.5",
         "apk-mitm": "^1.2.1",
         "extract-zip": "^2.0.1"
     }

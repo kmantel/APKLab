@@ -32,6 +32,11 @@ const quickPickItems: { [index: string]: QuickPickItem[] } = {
      */
     decodeQuickPickItems: [
         {
+            label: "has split-configs",
+            detail: "Recompiles the split-configs to avoid signature mismatch",
+            description: "split_config",
+        },
+        {
             label: "quark_analysis",
             detail: "Detect potential malicious activities in APK using Quark-Engine.",
             description: "[Use Quark-Engine]",
