@@ -166,6 +166,13 @@
   resolved "https://registry.yarnpkg.com/@tybys/oid/-/oid-3.0.0.tgz#ee581f2d23d631a049312d1049c54f9b4334983c"
   integrity sha512-sRsDzqzxsinQV4Ewl65trK45qjINNRh6/iFn/Wil+cab4l5rFy8sQu7OfRL2LNIuLPvVXG/lsVqKvsuMLo5Ttw==
 
+"@types/cross-spawn@^6.0.2":
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/@types/cross-spawn/-/cross-spawn-6.0.2.tgz#168309de311cd30a2b8ae720de6475c2fbf33ac7"
+  integrity sha512-KuwNhp3eza+Rhu8IFI5HUXRP0LIhqH5cAjubUvGXXthh4YYBuP2ntwEX+Cz8GJoZUHlKo247wPWOfA9LYEq4cw==
+  dependencies:
+    "@types/node" "*"
+
 "@types/eslint-scope@^3.7.3":
   version "3.7.7"
   resolved "https://registry.yarnpkg.com/@types/eslint-scope/-/eslint-scope-3.7.7.tgz#3108bd5f18b0cdb277c867b3dd449c9ed7079ac5"
