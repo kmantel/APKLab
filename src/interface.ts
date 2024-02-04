@@ -172,6 +172,14 @@ export namespace UI {
     export async function rebuildAPK(
         apktoolYmlPath: string
     ): Promise<string[] | undefined> {
+        const args = await rebuildArgs();
+        if (args) {
+            await apktool.rebuildAPK(apktoolYmlPath, args);
+        }
+        return args;
+    }
+
+    export async function rebuildArgs(): Promise<string[] | undefined>{
         const quickPickItems = await showArgsQuickPick(
             quickPickUtil.getQuickPickItems("rebuildQuickPickItems"),
             "Additional Apktool arguments",
@@ -179,9 +187,6 @@ export namespace UI {
         const args = quickPickItems
             ? quickPickItems.map<string>((item) => item.label)
             : undefined;
-        if (args) {
-            await apktool.rebuildAPK(apktoolYmlPath, args);
-        }
-        return args;
+            return args;
     }
 }

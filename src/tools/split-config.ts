@@ -116,17 +116,19 @@ export namespace SplitConfig {
 
     export async function rebuildAllApks(configYmlPath: string): Promise<void> {
         const data: any = yml.load(fs.readFileSync(configYmlPath, "utf8"));
-        let args: string[] | undefined = undefined;
         const distBuildFiles: string[] = [];
+        const params = [];
         for (const [idx, apkDir] of data["projectsDir"].entries()) {
             const apktoolYmlPath = path.join(apkDir, "apktool.yml");
             distBuildFiles.push(path.join(apkDir, "dist", data["apks"][idx]));
-            if (!args) {
-                args = await UI.rebuildAPK(apktoolYmlPath);
-            } else {
-                await apktool.rebuildAPK(apktoolYmlPath, args);
-            }
+            params.push(apktoolYmlPath);
         }
+        const args = await UI.rebuildArgs();
+        if (args)
+            await Promise.all(
+                params.map((param) =>apktool.rebuildAPK(param, args))
+            );
+        else return
         const newDistPath = path.join(path.parse(configYmlPath).dir, "dist");
         fs.mkdir(newDistPath, (err) => {
             if (err) console.log("overwriting dist folder....");
@@ -137,7 +139,7 @@ export namespace SplitConfig {
                         console.log(err);
                         return;
                     }
-                    console.log("File moved successfully!");
+                    console.log(`File moved ${data["apks"][idx]} successfully!`);
                 });
             }
         });
@@ -149,7 +151,7 @@ export namespace SplitConfig {
         const apkFilesName = data["apks"].map((apk: string) =>
             path.join(distPath, apk)
         );
-        const cmd = apkFilesName.join(" ");
+        const cmd = data.apks.join(" + ");
 
         const report = `Installing ${cmd}`;
         const args = ["install-multiple", "-r", ...apkFilesName];
