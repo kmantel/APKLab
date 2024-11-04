@@ -121,26 +121,26 @@ export function activate(context: vscode.ExtensionContext): void {
                 })
                 .catch(() => {
                     outputChannel.appendLine(
-                        "Can't download/update dependencies!"
+                        "Can't download/update dependencies!",
                     );
                 });
-        }
+        },
     );
 
     const installAllSplitApks = vscode.commands.registerCommand(
         "apklab.installAllSplitApks",
         (uri: vscode.Uri) => {
             SplitConfig.installAllApks(uri.fsPath);
-        }
+        },
     );
 
     const rebuildAndInstallAllSplitApks = vscode.commands.registerCommand(
         "apklab.rebuildAndinstallAllSplitApks",
-        async (uri:vscode.Uri)=> {
-            await SplitConfig.rebuildAllApks(uri.fsPath)
-            await SplitConfig.installAllApks(uri.fsPath)
-        }
-    )
+        async (uri: vscode.Uri) => {
+            await SplitConfig.rebuildAllApks(uri.fsPath);
+            await SplitConfig.installAllApks(uri.fsPath);
+        },
+    );
 
     context.subscriptions.push(
         openApkFileCommand,

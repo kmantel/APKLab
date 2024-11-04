@@ -108,7 +108,7 @@ export namespace UI {
                         args,
                         decompileJava,
                         jadxArgs,
-                        quarkAnalysis
+                        quarkAnalysis,
                     );
                 } else {
                     await processApkFile(
@@ -118,7 +118,7 @@ export namespace UI {
                         decompileJava,
                         jadxArgs,
                         quarkAnalysis,
-                        true
+                        true,
                     );
                 }
             }
@@ -133,7 +133,7 @@ export namespace UI {
         decompileJava: boolean,
         jadxArgs: string[],
         quarkAnalysis: boolean,
-        openNewWindow: boolean
+        openNewWindow: boolean,
     ): Promise<void> {
         // decode APK
         await apktool.decodeAPK(apkFilePath, projectDir, args);
@@ -170,7 +170,7 @@ export namespace UI {
      * @param apktoolYmlPath path of the `apktool.yml` file.
      */
     export async function rebuildAPK(
-        apktoolYmlPath: string
+        apktoolYmlPath: string,
     ): Promise<string[] | undefined> {
         const args = await rebuildArgs();
         if (args) {
@@ -179,7 +179,7 @@ export namespace UI {
         return args;
     }
 
-    export async function rebuildArgs(): Promise<string[] | undefined>{
+    export async function rebuildArgs(): Promise<string[] | undefined> {
         const quickPickItems = await showArgsQuickPick(
             quickPickUtil.getQuickPickItems("rebuildQuickPickItems"),
             "Additional Apktool arguments",
@@ -187,6 +187,6 @@ export namespace UI {
         const args = quickPickItems
             ? quickPickItems.map<string>((item) => item.label)
             : undefined;
-            return args;
+        return args;
     }
 }

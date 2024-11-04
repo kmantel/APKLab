@@ -14,7 +14,7 @@ export namespace SplitConfig {
         args: string[],
         decompileJava: boolean,
         jadxArgs: string[],
-        quarkAnalysis: boolean
+        quarkAnalysis: boolean,
     ): Promise<void> {
         const folderName = path.parse(apkFilePath).name;
         const projectRootDir = projectDir;
@@ -57,7 +57,7 @@ export namespace SplitConfig {
                     .map((file) => path.join(parentPath, file));
 
                 splitApksProjectDir = splitApksFilePath.map((file) =>
-                    path.join(projectRootDir, path.parse(file).name)
+                    path.join(projectRootDir, path.parse(file).name),
                 );
                 const data = {
                     rootDir: projectRootDir,
@@ -70,7 +70,7 @@ export namespace SplitConfig {
                     apks: [
                         path.parse(apkFilePath).base,
                         ...splitApksFilePath.map(
-                            (file) => path.parse(file).base
+                            (file) => path.parse(file).base,
                         ),
                     ],
                     projectsDir: [projectDir, ...splitApksProjectDir],
@@ -94,7 +94,7 @@ export namespace SplitConfig {
             decompileJava,
             jadxArgs,
             quarkAnalysis,
-            false
+            false,
         );
         for (const [idx, apkPath] of splitApksFilePath.entries()) {
             await UI.processApkFile(
@@ -104,13 +104,13 @@ export namespace SplitConfig {
                 decompileJava,
                 jadxArgs,
                 quarkAnalysis,
-                false
+                false,
             );
         }
         await commands.executeCommand(
             "vscode.openFolder",
             Uri.file(projectRootDir),
-            true
+            true,
         );
     }
 
@@ -126,9 +126,9 @@ export namespace SplitConfig {
         const args = await UI.rebuildArgs();
         if (args)
             await Promise.all(
-                params.map((param) =>apktool.rebuildAPK(param, args))
+                params.map((param) => apktool.rebuildAPK(param, args)),
             );
-        else return
+        else return;
         const newDistPath = path.join(path.parse(configYmlPath).dir, "dist");
         fs.mkdir(newDistPath, (err) => {
             if (err) console.log("overwriting dist folder....");
@@ -139,7 +139,9 @@ export namespace SplitConfig {
                         console.log(err);
                         return;
                     }
-                    console.log(`File moved ${data["apks"][idx]} successfully!`);
+                    console.log(
+                        `File moved ${data["apks"][idx]} successfully!`,
+                    );
                 });
             }
         });
@@ -149,7 +151,7 @@ export namespace SplitConfig {
         const data: any = yml.load(fs.readFileSync(configYmlPath, "utf8"));
         const distPath = path.join(path.parse(configYmlPath).dir, "dist");
         const apkFilesName = data["apks"].map((apk: string) =>
-            path.join(distPath, apk)
+            path.join(distPath, apk),
         );
         const cmd = data.apks.join(" + ");
 
