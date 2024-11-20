@@ -44,7 +44,7 @@ export namespace SplitConfig {
                     console.error("Error reading directory:", err);
                     return;
                 }
-                const prefix = "split_config";
+                const prefix = "split_";
 
                 splitApksFilePath = files
                     .filter((file) => {
