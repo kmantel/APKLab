@@ -3,7 +3,9 @@ import * as https from "https";
 import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
-import * as extract from "extract-zip";
+// TODO: replace with another unzip library that has proper types
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+import extract = require("extract-zip");
 import {
     extensionConfigName,
     apklabDataDir,
@@ -33,9 +35,11 @@ export async function downloadTool(tool: Tool): Promise<string | null> {
                 outputChannel.appendLine(
                     `Extracted ${filePath} into ${configPath}`,
                 );
-            } catch (err: any) {
+            } catch (err) {
+                const errorMessage =
+                    err instanceof Error ? err.message : String(err);
                 outputChannel.appendLine(
-                    `Error: Extracting file ${filePath}: ${err.message}`,
+                    `Error: Extracting file ${filePath}: ${errorMessage}`,
                 );
             }
         }
@@ -54,12 +58,25 @@ export async function downloadTool(tool: Tool): Promise<string | null> {
 }
 
 /**
+ * Maximum number of redirects to follow
+ */
+const MAX_REDIRECTS = 5;
+
+/**
  * Download file from a given URL.
  * @param urlString download URL for the file.
+ * @param redirectCount current redirect count (for internal use).
  * @returns a Buffer of the file contents.
  */
-export async function downloadFile(urlString: string): Promise<Buffer> {
-    const buffers: any[] = [];
+export async function downloadFile(
+    urlString: string,
+    redirectCount = 0,
+): Promise<Buffer> {
+    if (redirectCount >= MAX_REDIRECTS) {
+        throw new Error(`Too many redirects (max ${MAX_REDIRECTS})`);
+    }
+
+    const buffers: Buffer[] = [];
 
     return new Promise<Buffer>((resolve, reject) => {
         const request = https.request(new URL(urlString), (response) => {
@@ -68,14 +85,14 @@ export async function downloadFile(urlString: string): Promise<Buffer> {
                 response.headers.location
             ) {
                 // Redirect - download from new location
-                return resolve(downloadFile(response.headers.location));
+                return resolve(
+                    downloadFile(response.headers.location, redirectCount + 1),
+                );
             } else if (response.statusCode !== 200) {
                 // Download failed - print error message
-                outputChannel.appendLine(
-                    "Download failed with response code: " +
-                        response.statusCode,
-                );
-                reject("Failed");
+                const errorMsg = `Download failed with response code: ${response.statusCode}`;
+                outputChannel.appendLine(errorMsg);
+                reject(new Error(errorMsg));
             }
 
             // Downloading - hook up events

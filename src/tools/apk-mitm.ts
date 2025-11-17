@@ -1,10 +1,8 @@
+import * as fs from "fs";
 import * as path from "path";
 import { applyPatches, observeListr } from "apk-mitm";
 import * as vscode from "vscode";
 import { outputChannel } from "../data/constants";
-
-// Defined in webpack config
-declare const APK_MITM_VERSION: string;
 
 export namespace apkMitm {
     /**
@@ -14,6 +12,21 @@ export namespace apkMitm {
     export async function applyMitmPatches(
         apktoolYmlPath: string,
     ): Promise<void> {
+        if (!apktoolYmlPath || !path.isAbsolute(apktoolYmlPath)) {
+            vscode.window.showErrorMessage(
+                `APKLab: Invalid apktool.yml path: ${apktoolYmlPath}`,
+            );
+            return;
+        }
+
+        const projectDir = path.dirname(apktoolYmlPath);
+        if (!fs.existsSync(projectDir)) {
+            vscode.window.showErrorMessage(
+                `APKLab: Project directory not found: ${projectDir}`,
+            );
+            return;
+        }
+
         try {
             const report = "Applying patches for HTTPS inspection (MITM)";
 
@@ -22,13 +35,9 @@ export namespace apkMitm {
             outputChannel.appendLine(report);
             outputChannel.appendLine("-".repeat(report.length));
 
-            if (!process.env["TEST"]) {
-                outputChannel.appendLine(
-                    `Using apk-mitm v${APK_MITM_VERSION} (https://github.com/shroudedcode/apk-mitm)\n`,
-                );
-            }
-
-            const projectDir = path.dirname(apktoolYmlPath);
+            outputChannel.appendLine(
+                `Using apk-mitm (https://github.com/shroudedcode/apk-mitm)\n`,
+            );
 
             await observeListr(applyPatches(projectDir)).forEach((line) =>
                 outputChannel.appendLine(line),
@@ -38,8 +47,10 @@ export namespace apkMitm {
             vscode.window.showInformationMessage(
                 "APKLab: Successfully applied MITM patches!",
             );
-        } catch (err: any) {
-            outputChannel.appendLine(err);
+        } catch (err) {
+            const errorMessage =
+                err instanceof Error ? err.message : String(err);
+            outputChannel.appendLine(errorMessage);
             outputChannel.appendLine("Failed to apply MITM patches!");
             vscode.window.showErrorMessage(
                 "APKLab: Failed to apply MITM patches!",

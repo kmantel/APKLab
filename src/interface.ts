@@ -1,7 +1,11 @@
 import * as path from "path";
 import * as fs from "fs";
 import { commands, QuickPickItem, Uri, window, workspace } from "vscode";
-import { extensionConfigName, outputChannel } from "./data/constants";
+import {
+    APK_FILE_EXTENSION,
+    extensionConfigName,
+    outputChannel,
+} from "./data/constants";
 import { quickPickUtil } from "./utils/quick-picks";
 import { Quark } from "./tools/quark-engine";
 import { apktool } from "./tools/apktool";
@@ -37,7 +41,7 @@ export namespace UI {
         const result = await window.showOpenDialog({
             canSelectFolders: false,
             filters: {
-                APK: ["apk"],
+                APK: [APK_FILE_EXTENSION.substring(1)], // Remove the dot
             },
             openLabel: "Select an APK file",
         });
@@ -66,23 +70,28 @@ export namespace UI {
                 let quarkAnalysis = false;
                 let jadxArgs: string[] = [];
 
-                if (jadxOptionsIndex > -1) {
+                // Extract jadx options if present
+                if (jadxOptionsIndex !== -1) {
                     jadxArgs = args.splice(jadxOptionsIndex, jadxOptionsNumber);
                 }
-                if (decompileJavaIndex > -1) {
+
+                // Check if Java decompilation was requested
+                if (decompileJavaIndex !== -1) {
                     decompileJava = true;
                     args.splice(decompileJavaIndex, 1);
                 }
-                if (quarkAnalysisIndex > -1) {
+
+                // Check if Quark analysis was requested
+                if (quarkAnalysisIndex !== -1) {
                     quarkAnalysis = true;
                     args.splice(quarkAnalysisIndex, 1);
                     if (!Quark.checkQuarkInstalled()) {
                         quarkAnalysis = false;
                         window.showErrorMessage(
-                            "APKLab: Quark command not found, \
-                            please make sure you have installed python3 and Quark-Engine. \
-                            Check here to install Quark-Engine: \
-                            https://github.com/quark-engine/quark-engine",
+                            "APKLab: Quark command not found. " +
+                                "Please make sure you have installed python3 and Quark-Engine. " +
+                                "Check here to install Quark-Engine: " +
+                                "https://github.com/quark-engine/quark-engine",
                         );
                         return;
                     }
