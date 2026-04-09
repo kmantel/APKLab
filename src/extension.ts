@@ -4,7 +4,6 @@ import * as vscode from "vscode";
 import {
     apklabDataDir,
     DIST_DIR,
-    outputChannel,
     QUARK_REPORT_FILENAME,
 } from "./data/constants";
 import { checkAndInstallTools, updateTools } from "./utils/updater";
@@ -13,6 +12,8 @@ import { apkMitm } from "./tools/apk-mitm";
 import { Quark } from "./tools/quark-engine";
 import { adb } from "./tools/adb";
 import { apktool } from "./tools/apktool";
+import { frida } from "./tools/frida";
+import { smaliLsp } from "./tools/smali-lsp";
 import { SplitConfig } from "./tools/split-config";
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -27,62 +28,39 @@ export function activate(context: vscode.ExtensionContext): void {
     const openApkFileCommand = vscode.commands.registerCommand(
         "apklab.openApkFile",
         async () => {
-            checkAndInstallTools()
-                .then(async () => {
-                    UI.openApkFile();
-                })
-                .catch(() => {
-                    outputChannel.appendLine(
-                        "Can't download/update dependencies!",
-                    );
-                });
+            await checkAndInstallTools();
+            await UI.openApkFile();
         },
     );
 
     // command for rebuilding apk file
     const rebuildAPkFileCommand = vscode.commands.registerCommand(
         "apklab.rebuildApkFile",
-        (uri: vscode.Uri) => {
-            checkAndInstallTools()
-                .then(() => {
-                    UI.rebuildAPK(uri.fsPath);
-                })
-                .catch(() => {
-                    outputChannel.appendLine(
-                        "Can't download/update dependencies!",
-                    );
-                });
+        async (uri: vscode.Uri) => {
+            await checkAndInstallTools();
+            await UI.rebuildAPK(uri.fsPath);
         },
     );
 
     // command for installing apk file
     const installAPkFileCommand = vscode.commands.registerCommand(
         "apklab.installApkFile",
-        (uri: vscode.Uri) => {
-            adb.installAPK(uri.fsPath);
-        },
+        (uri: vscode.Uri) => adb.installAPK(uri.fsPath),
     );
 
     // command for rebuilding and installing the apk
     const rebuildAndInstallAPkFileCommand = vscode.commands.registerCommand(
         "apklab.rebuildAndInstallApkFile",
-        (uri: vscode.Uri) => {
-            checkAndInstallTools()
-                .then(async () => {
-                    await UI.rebuildAPK(uri.fsPath);
-                    const parentPath = path.parse(uri.fsPath).dir;
-                    const apkPath = path.join(
-                        parentPath,
-                        DIST_DIR,
-                        apktool.getApkNameFromApkToolYaml(uri.fsPath),
-                    );
-                    await adb.installAPK(apkPath);
-                })
-                .catch(() => {
-                    outputChannel.appendLine(
-                        "Can't download/update dependencies!",
-                    );
-                });
+        async (uri: vscode.Uri) => {
+            await checkAndInstallTools();
+            await UI.rebuildAPK(uri.fsPath);
+            const parentPath = path.parse(uri.fsPath).dir;
+            const apkPath = path.join(
+                parentPath,
+                DIST_DIR,
+                apktool.getApkNameFromApkToolYaml(uri.fsPath),
+            );
+            await adb.installAPK(apkPath);
         },
     );
 
@@ -95,16 +73,9 @@ export function activate(context: vscode.ExtensionContext): void {
     // command to empty apktool framework resource dir
     const emptyFrameworkDirCommand = vscode.commands.registerCommand(
         "apklab.emptyFrameworkDir",
-        () => {
-            checkAndInstallTools()
-                .then(() => {
-                    apktool.emptyFrameworkDir();
-                })
-                .catch(() => {
-                    outputChannel.appendLine(
-                        "Can't download/update dependencies!",
-                    );
-                });
+        async () => {
+            await checkAndInstallTools();
+            await apktool.emptyFrameworkDir();
         },
     );
 
@@ -114,6 +85,23 @@ export function activate(context: vscode.ExtensionContext): void {
         (uri: vscode.Uri) => {
             Quark.showSummaryReport(uri.fsPath);
         },
+    );
+
+    // command to manually update/install tools
+    const updateToolsCommand = vscode.commands.registerCommand(
+        "apklab.updateTools",
+        () => checkAndInstallTools(),
+    );
+
+    // Frida commands
+    const generateFridaHookCommand = vscode.commands.registerCommand(
+        "apklab.generateFridaHook",
+        () => frida.generateHook(),
+    );
+
+    const injectFridaGadgetCommand = vscode.commands.registerCommand(
+        "apklab.injectFridaGadget",
+        (uri: vscode.Uri) => frida.injectGadget(uri),
     );
 
     // command to build all split apks
@@ -155,6 +143,9 @@ export function activate(context: vscode.ExtensionContext): void {
         patchApkForHttpsCommand,
         emptyFrameworkDirCommand,
         quarkReportCommand,
+        updateToolsCommand,
+        generateFridaHookCommand,
+        injectFridaGadgetCommand,
         buildSplitApks,
         installAllSplitApks,
         rebuildAndInstallAllSplitApks,
@@ -173,6 +164,13 @@ export function activate(context: vscode.ExtensionContext): void {
         }
     }
 
+    // register Smali LSP (lazy — starts when a .smali file is opened)
+    smaliLsp.register(context);
+
     // check for the tools update
     updateTools();
+}
+
+export function deactivate(): Thenable<void> | undefined {
+    return smaliLsp.stopServer();
 }

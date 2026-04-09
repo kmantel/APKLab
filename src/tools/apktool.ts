@@ -8,6 +8,7 @@ import {
     outputChannel,
 } from "../data/constants";
 import { executeProcess } from "../utils/executor";
+import { getJavaPath } from "../utils/java";
 import { apkSigner } from "./uber-apk-signer";
 
 export namespace apktool {
@@ -84,7 +85,7 @@ export namespace apktool {
         await executeProcess({
             name: "Decoding",
             report: report,
-            command: "java",
+            command: getJavaPath(),
             args: args,
             shouldExist: shouldExist,
         });
@@ -138,7 +139,7 @@ export namespace apktool {
         await executeProcess({
             name: "Rebuilding",
             report: report,
-            command: "java",
+            command: getJavaPath(),
             args: args,
             shouldExist: outputApkFilePath,
             onSuccess: () => {
@@ -156,16 +157,11 @@ export namespace apktool {
             vscode.workspace.getConfiguration(extensionConfigName);
         const apktoolPath = extensionConfig.get("apktoolPath");
         const report = "Cleaning up ApkTool Framework dir";
-        const args = [
-            "-jar",
-            String(apktoolPath),
-            "empty-framework-dir",
-            "--force",
-        ];
+        const args = ["-jar", String(apktoolPath), "clean-frameworks"];
         await executeProcess({
             name: "Cleanup Apktool framework dir",
             report: report,
-            command: "java",
+            command: getJavaPath(),
             args: args,
         });
     }

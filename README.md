@@ -11,7 +11,7 @@ The ultimate Android RE experience right inside your <a href="https://code.visua
 </h4>
 
 <p align="center">
-APKLab seamlessly integrates the best open-source tools: <a href="https://github.com/ibotpeaches/apktool/">Apktool</a>, <a href="https://github.com/skylot/jadx">Jadx</a>, <a href="https://github.com/patrickfav/uber-apk-signer">uber-apk-signer</a>, <a href="https://github.com/shroudedcode/apk-mitm/">apk-mitm</a> and more to the excellent VS Code so you can focus on app analysis and get it done without leaving the IDE.
+APKLab seamlessly integrates the best open-source tools: <a href="https://github.com/ibotpeaches/apktool/">Apktool</a>, <a href="https://github.com/Surendrajat/smali-lsp">smali-lsp</a>, <a href="https://github.com/skylot/jadx">Jadx</a>, <a href="https://github.com/patrickfav/uber-apk-signer">uber-apk-signer</a>, <a href="https://github.com/shroudedcode/apk-mitm/">apk-mitm</a> and more to the excellent VS Code so you can focus on app analysis and get it done without leaving the IDE.
 </p>
 
 <p align="center">
@@ -29,43 +29,42 @@ APKLab seamlessly integrates the best open-source tools: <a href="https://github
     </a>
 </p>
 <p align="center">
-    <a href="https://forum.xda-developers.com/t/4109409/">
-        <img alt="XDA Developers" src="https://img.shields.io/badge/XDA%20Forums-ffb?logo=xda-developers">
-    </a>
     <a href="https://t.me/apklab_re">
         <img alt="Telegram" src="https://img.shields.io/badge/telegram-eff?logo=telegram">
     </a>
     <a href="https://matrix.to/#/#apklab:matrix.org">
         <img alt="Matrix" src="https://img.shields.io/badge/matrix-f5faef?logo=matrix&logoColor=black">
     </a>
+        <a href="https://forum.xda-developers.com/t/4109409/">
+        <img alt="XDA Developers" src="https://img.shields.io/badge/XDA%20Forums-ffb?logo=xda-developers">
+    </a>
 </p>
 
 ## Features
 
-- Decode all the resources from an APK
-- Disassemble the APK to Dalvik bytecode aka Smali
+- Decode/Edit/Rebuild app resource files
+- Disassemble/Mod/Rebuild an APK to/from Smali
 - Decompile the APK to Java source
-- Interactive Malware Analysis Report
-- Initialize Project dir as Git repo
-- Excellent Smali language support with [**Smalise**](https://github.com/LoyieKing/Smalise)
-- Analyze & Hack effectively with feature-rich VS Code
+- Excellent Smali language support with [**smali-lsp**](https://github.com/Surendrajat/smali-lsp) — go to definition, find references, hover, call/type hierarchy, code lens, completion, diagnostics
+- Analyze & mod effectively in VS Code with full IDE features
+- Sign & Install the APK after rebuild
+- Generate Frida hooks for any smali methods
+- Inject Frida gadget into APK with automatic main activity patching
+- Initialize `git` repo in project dir to track changes
 - Apply MITM patch for HTTPS inspection
-- Build an APK from Smali and resources
-- Rebuild an APK in Debug mode for dynamic analysis
-- Sign the APK seamlessly during the build
-- Install the APK directly from VS Code
+- Interactive Malware Analysis Report
 - Support for Apktool-style projects (`apktool.yml`)
-- Support for most Apktool CLI arguments
-- Android resource frameworks management (Coming soon!)
+- Support for Apktool 3.0+ CLI arguments
+- Android resource frameworks management
 - Support for user-provided keystore for APK signing
-- Download and configure missing dependencies
-- Supports Linux, Windows, and Mac
+- Check for update and install needed tools automatically
+- Supports Linux, Mac and WSL2
 
 ## Requirements
 
-- **JDK 11+**
+- **JDK 17+**
 
-  > Run **`java -version`** in your Shell, if not found, download from [here](https://adoptopenjdk.net/).
+  > Run **`java -version`** in your Shell, if not found, download from [here](https://adoptium.net/).
 
 - **quark-engine >=21.01.6** (optional - for malware analysis)
 
@@ -102,6 +101,16 @@ APKLab seamlessly integrates the best open-source tools: <a href="https://github
 
   ![install.gif](https://github.com/APKLab/APKLab/raw/master/assets/install.gif)
 
+#### Generate Frida Hook
+
+- Right-Click inside a `.method` in a `.smali` file ➜ <kbd>APKLab: Generate Frida Hook</kbd>
+- Hook is appended to `frida_hooks.ts` in the project root
+
+#### Inject Frida Gadget
+
+- Right-Click on or inside `apktool.yml` file ➜ <kbd>APKLab: Inject Frida Gadget</kbd>
+- Select the gadget `.so` file, target architecture, and the main activity is patched automatically
+
 #### Clean ApkTool frameworks dir
 
 - Open the Command Palette (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>) ➜ <kbd>APKLab: Empty ApkTool Framework Dir</kbd>
@@ -122,6 +131,14 @@ APKLab seamlessly integrates the best open-source tools: <a href="https://github
 - **`apklab.jadxDirPath`**: Full Path of `jadx-x.y.z` dir. If you want to use a different version of it, change it like:
 
   `"apklab.jadxDirPath": "/home/oozer/downloads/jadx-1.1.0"`
+
+- **`apklab.smaliLspPath`**: Full Path of `smali-lsp.jar`. If you want to use a different version of it, change it like:
+
+  `"apklab.smaliLspPath": "/home/oozer/downloads/smali-lsp.jar"`
+
+- **`apklab.javaPath`**: Path to the Java executable (default: `java`). Change it if Java is not on your PATH:
+
+  `"apklab.javaPath": "/usr/lib/jvm/java-17/bin/java"`
 
 </details>
 <details>
@@ -144,6 +161,7 @@ APKLab seamlessly integrates the best open-source tools: <a href="https://github
 
 - **`apklab.initProjectDirAsGit`**: Initialize project output directory as **Git** repository.
 - **`apklab.updateTools`**: Whether APKLab should check for tools (for apklab, jadx...) update and show a notification.
+- **`smaliLsp.trace.server`**: Traces the communication between VS Code and the Smali Language Server (`off`, `messages`, `verbose`).
 
 </details>
 
@@ -168,5 +186,3 @@ For bug reports, feature requests or simply discussing an idea, please open an i
 - [iBotPeaches](https://github.com/iBotPeaches), [brutall](https://github.com/brutall) and [JesusFreke](https://github.com/JesusFreke) for Apktool & Smali
 - [patrickfav](https://github.com/patrickfav) for uber-apk-signer
 - [skylot](https://github.com/skylot) for Jadx
-- [Loyie King](https://github.com/LoyieKing) for Smalise
-</details>
